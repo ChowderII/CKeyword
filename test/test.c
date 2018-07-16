@@ -9,9 +9,11 @@ void *entry(void *x_void_ptr)
 		sleep(1);
 		printf("Spawning thread from inside the thread %d\n", x_void_ptr);
 		pthread_t myThreadID2;
-		printf("Before Thread\n");
 		pthread_create(&myThreadID2, NULL, entry, -1);
 		pthread_join(myThreadID2, NULL);
+	}
+	else {
+		printf("Inside double thread  %d\n", x_void_ptr);
 	}
 	return NULL;
 }
