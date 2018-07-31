@@ -9,3 +9,9 @@ The intended use of this program is to generate relevant keywords based on PHAC 
 
 ## Current stage
 We have just created the project. The project is in its infancy. Research is being conducted to solidify the documentation and design of the program.
+
+## Compilers inside C9 cheat sheet
+The C9 environment offers two compilers gcc and mingw64. gcc can be used to create linux executables while mingw64 is used to create Windows executable. To compile a program with gcc use the following command:
+```Bash
+gcc -o main.c main
+```
