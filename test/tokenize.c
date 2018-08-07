@@ -14,14 +14,30 @@ objective with the project.
 #include "include/tokenize.h"
 
 int main (void) {
-    char* ipsum = "Lorem";
-    Word testword;
+    char *corpus = NULL;
+    corpus = getCorpus("data/lipsum.txt");
+    Word **tokens = NULL;
+    size_t tokens_length = 0;
     
-    testword.word = malloc(strlen(ipsum));
-    testword.word = strncat(testword.word, ipsum, strlen(ipsum));
     
-    printf("%s\n", getCorpus("data/lipsum.txt"));
-    
+    char currentWord[20];
+    int j = 0;
+    for (int i = 0; i < 20; i++){
+        if (isalpha(corpus[i])){
+            currentWord[j++] = corpus[i];
+        }
+        else { // space or something
+            tokens = (Word **) realloc(tokens, (tokens_length + 3) * sizeof(Word*));
+            tokens[tokens_length]->word = malloc(strlen(currentWord));
+            tokens[tokens_length]->word = strncpy(tokens[tokens_length]->word ,currentWord, strlen(currentWord));
+            tokens[tokens_length]->corpusID = 0;
+            
+            j = 0;
+            tokens_length++;
+            };
+    }
+    for (int i = 0; i < tokens_length; i++)
+        printf("%s\n", tokens[i]->word);
     return 0;
 }
 
