@@ -11,33 +11,51 @@ objective with the project.
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include "include/tokenize.h"
 
+Word** addWord(Word **pTokens, char *word, int corpusID);
+int pTokens_length = 0;
+
 int main (void) {
-    char *corpus = NULL;
-    corpus = getCorpus("data/lipsum.txt");
-    Word **tokens = NULL;
-    size_t tokens_length = 0;
+    char *corpus = NULL;  // contains the text to be tokenized
+    corpus = getCorpus("data/lipsum.txt");  // go gets it
+    Word **pTokens = NULL;  // initialization of outer pointer
     
-    
-    char currentWord[20];
-    int j = 0;
-    for (int i = 0; i < 20; i++){
-        if (isalpha(corpus[i])){
-            currentWord[j++] = corpus[i];
+    char *currentWord = NULL;  // current word examined in corpus
+    int j = 0;  // position of "cursor" inside current word
+    bool isOnlyNumber = true;  // indicates wether or not the word is only a number
+    // go through the corpus character by character
+    for (int i = 0; i < strlen(corpus); i++){
+        // if the character is alphanumeric or is dash (for composite words)
+        if (isalpha(corpus[i]) || corpus[i] == (int) "-" || isdigit(corpus[i])){
+            // if so, increase size of currentWord to allow it to fit
+            currentWord = realloc(currentWord, j*(sizeof(char))+1);
+            // place the character inside and remove upper cases
+            currentWord[j++] = tolower(corpus[i]);
+            // if the character is a letter, then the word isn't only a number
+            // and can thus be considered
+            if (isalpha(corpus[i]))
+                isOnlyNumber = false;
         }
-        else { // space or something
-            tokens = (Word **) realloc(tokens, (tokens_length + 3) * sizeof(Word*));
-            tokens[tokens_length]->word = malloc(strlen(currentWord));
-            tokens[tokens_length]->word = strncpy(tokens[tokens_length]->word ,currentWord, strlen(currentWord));
-            tokens[tokens_length]->corpusID = 0;
-            
+        else { // space or something else
+            // if the word is not empty or only a number
+            if (currentWord != NULL && !isOnlyNumber){
+                // add the new word to the list with the corpusID (here 12 is 
+                // just a placeholder)
+                pTokens = addWord(pTokens, currentWord, 12);
+            }
+            // reset currentWord cursor, empty currentWord and reset flag
             j = 0;
-            tokens_length++;
-            };
+            currentWord = NULL;
+            isOnlyNumber = true;
+        };
     }
-    for (int i = 0; i < tokens_length; i++)
-        printf("%s\n", tokens[i]->word);
+    // print the results of pTokens (used for testing and showing off)
+    for (int i = 0; i < 20; i++)
+        printf("%s\n", pTokens[i]->word);
+    // free pTokens
+    free(pTokens);
     return 0;
 }
 
@@ -66,12 +84,6 @@ char* getCorpus(char* PATH){
   the existing string of corpus.
   */
   while ((nread = fread(line, 1, 256, fptr)) > 0){
-    // before allocating new memory, uncapitalize every single character in the
-    // string
-    for(int i = 0; i < (int)nread; i++){
-        line[i] = tolower(line[i]);
-    }
-      
     corpus = realloc(corpus, strlen(corpus) + nread);
     if (corpus == NULL){
         printf("realloc failed, exiting");
@@ -84,4 +96,45 @@ char* getCorpus(char* PATH){
   free(line);
   fclose(fptr);
   return corpus;
+}
+
+/*
+This function adds a word to the pTokens pointer of pointers. 
+arguments:
+Word **pTokens
+    this is the pointer to the list of struct pointers, its new values gets
+    returned at the end of the function
+
+char *word:
+    this is the word to be added in the list
+
+int corpusID:
+    represents which document is this word found in 
+    
+return:
+Word ** pTokens:
+    returns the new pointer
+*/
+Word ** addWord(Word **pTokens, char *word, int corpusID){
+    // reallocated the existing memory of the pTokens pointer with its existing
+    // size + 1 just big enough to accomodate a new pointer to a Word struct
+    pTokens = realloc(pTokens, (pTokens_length +1) * sizeof(Word*));
+    // now that the spot for the outer pointer has been created, we need to
+    // create space to hold the struc Word
+    pTokens[pTokens_length] = malloc(sizeof(Word));
+    // inside that Word, since the string word can be of varying length, we also
+    // have to allocate it dynamically
+    pTokens[pTokens_length]->word = malloc(strlen(word));
+    // copy the new string inside (can't = because address would be the same)
+    pTokens[pTokens_length]->word = strncpy(pTokens[pTokens_length]->word,
+        word, strlen(word));
+    // since corpusID is an array of integer, we also have to allocate it the 
+    // proper space
+    pTokens[pTokens_length]->corpusID = malloc(sizeof(int));
+    // we then assign it its first corpusID value
+    pTokens[pTokens_length]->corpusID[0] = corpusID;
+    // increase the global size of pTokens via pTokens_length
+    pTokens_length++;
+    // and finaly return the pointer ... ouf!
+    return pTokens;
 }
