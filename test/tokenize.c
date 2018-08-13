@@ -14,7 +14,7 @@ objective with the project.
 #include <stdbool.h>
 #include "include/tokenize.h"
 
-Word** addWord(Word **pTokens, char *word, int corpusID);
+Word** addWord(Word **pTokens, char *word, int corpusID, int size);
 int pTokens_length = 0;
 
 int main (void) {
@@ -47,7 +47,7 @@ int main (void) {
             if (currentWord != NULL && !isOnlyNumber){
                 // add the new word to the list with the corpusID (here 12 is 
                 // just a placeholder)
-                pTokens = addWord(pTokens, currentWord, 12);
+                pTokens = addWord(pTokens, currentWord, 12, j);
             }
             // reset currentWord cursor, empty currentWord and reset flag
             j = 0;
@@ -60,7 +60,7 @@ int main (void) {
     if (currentWord != NULL && !isOnlyNumber){
         // add the new word to the list with the corpusID (here 12 is 
         // just a placeholder)
-        pTokens = addWord(pTokens, currentWord, 12);
+        pTokens = addWord(pTokens, currentWord, 12, j);
     }
     // reset currentWord cursor, empty currentWord and reset flag
     j = 0;
@@ -68,8 +68,11 @@ int main (void) {
     isOnlyNumber = true;
     
     // print the results of pTokens (used for testing and showing off)
-    for (int i = 0; i < pTokens_length; i++)
-        printf("%s\n", pTokens[i]->word);
+    for (int i = 0; i < pTokens_length; i++){
+        // prints only the amount of character by using precision in the
+        // printf arguments (%.\s) 
+        printf("%.*s\n", pTokens[i]->size, pTokens[i]->word);
+    }
     // free pTokens
     free(pTokens);
     return 0;
@@ -130,7 +133,7 @@ return:
 Word ** pTokens:
     returns the new pointer
 */
-Word ** addWord(Word **pTokens, char *word, int corpusID){
+Word ** addWord(Word **pTokens, char *word, int corpusID, int size){
     // reallocated the existing memory of the pTokens pointer with its existing
     // size + 1 just big enough to accomodate a new pointer to a Word struct
     pTokens = realloc(pTokens, (pTokens_length +1) * sizeof(Word*));
@@ -156,6 +159,8 @@ Word ** addWord(Word **pTokens, char *word, int corpusID){
     pTokens[pTokens_length]->corpusID = malloc(sizeof(int));
     // we then assign it its first corpusID value
     pTokens[pTokens_length]->corpusID[0] = corpusID;
+    // attach the size of the word
+    pTokens[pTokens_length]->size = size;
     // increase the global size of pTokens via pTokens_length
     pTokens_length++;
     // and finaly return the pointer ... ouf!
