@@ -17,3 +17,24 @@ unsigned long hash(unsigned char *str){
 
     return hash;
 }
+
+double TFBoolean(int numAppearance) {
+	if (numAppearance >= 1) {
+		return (double)1;
+	}
+	else {
+		return (double)0;
+	}
+}
+
+double TFRawCount(int numAppearance) {
+	return (double)numAppearance;
+}
+
+double TFLogNorm(int numAppearance) {
+	return (double)log((double)(1 + numAppearance));
+}
+
+double TFTermFrequency(int numAppearance, int documentLength) {
+	return (double)numAppearance/ (double)documentLength;
+}
